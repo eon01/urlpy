@@ -99,6 +99,41 @@ def test_deparam_case_insensitivity():
         good = base + good
         test(bad, good)
 
+def test_r_deparam_sane():
+    def test(bad, good):
+        assert_equal(url.parse(bad).r_deparam(['c']).unicode, good)
+
+    examples = [
+        ('?a=1&b=2&c1=3&d=4', '?a=1&b=2&d=4'),  # Maintains order
+        ('?a=1&&&&&&b=2'   , '?a=1&b=2'),  # Removes excess &'s
+        (';a=1;b=2;c1=3;d=4', ';a=1;b=2;d=4'),  # Maintains order
+        (';a=1;;;;;;b=2'   , ';a=1;b=2'),  # Removes excess ;'s
+        (';foo_c1=2'        , ';foo_c1=2'),  # Not overzealous
+        ('?foo_c1=2'        , '?foo_c1=2'),  # ...
+        ('????foo=2'       , '?foo=2'),  # Removes leading ?'s
+        (';foo'            , ';foo'),
+        ('?foo'            , '?foo'),
+        (''                , '')
+    ]
+    base = 'http://testing.com/page'
+    for bad, good in examples:
+        bad = base + bad
+        good = base + good
+        test(bad, good)
+
+def test_r_deparam_case_insensitivity():
+    def test(bad, good):
+        assert_equal(url.parse(bad).r_deparam(['HeLlO.*']).unicode, good)
+
+    examples = [
+        ('?hELLo_there=2', ''),
+        ('?HELLo_there=2', '')
+    ]
+    base = 'http://testing.com/page'
+    for bad, good in examples:
+        bad = base + bad
+        good = base + good
+        test(bad, good)
 
 def test_filter_params():
     def function(name, value):

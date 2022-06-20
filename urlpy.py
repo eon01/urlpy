@@ -237,6 +237,14 @@ class URL(object):
             return name.lower() in lowered
         return self.filter_params(function)
 
+    def r_deparam(self, params):
+        '''Strip any of the provided regex parameters out of the url'''
+        lowered = set([p.lower() for p in params])
+        def function(name, _):
+            regex = '^(' + '|'.join(lowered) + ')$'
+            return bool(re.search(regex, name.lower()))            
+        return self.filter_params(function)
+
     def filter_params(self, function):
         '''Remove parameters if function(name, value)'''
         def keep(query):
